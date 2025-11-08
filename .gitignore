@@ -265,3 +265,5 @@ history/
 *.msp
 # JetBrains Rider
 *.sln.iml
+
+wave.web/wwwroot/*
