@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="wwwroot\eslint.config.js" />
+    <Content Remove="wwwroot\package-lock.json" />
+    <Content Remove="wwwroot\package.json" />
+    <Content Remove="ReactApp\public\vite.svg" />
+    <Content Remove="ReactApp\src\App.css" />
+    <Content Remove="ReactApp\src\App.tsx" />
+    <Content Remove="ReactApp\src\assets\react.svg" />
+    <Content Remove="ReactApp\src\index.css" />
+    <Content Remove="ReactApp\src\main.tsx" />
+    <Content Remove="wwwroot\tsconfig.app.json" />
+    <Content Remove="wwwroot\tsconfig.node.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.10" />
+  </ItemGroup>
+
+  <Target Name="NpmInstall" BeforeTargets="Build">
+    <Exec Command="npm install" WorkingDirectory="ReactApp" />
+  </Target>
+
+  <Target Name="NpmBuild" AfterTargets="NpmInstall">
+    <Exec Command="npm run build" WorkingDirectory="ReactApp" />
+  </Target>
+
+  <ItemGroup>
+    <None Include="ReactApp\package-lock.json" />
+    <None Include="ReactApp\package.json" />
+    <None Include="ReactApp\tsconfig.app.json" />
+    <None Include="ReactApp\tsconfig.node.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
+  </ItemGroup>
+
+</Project>
