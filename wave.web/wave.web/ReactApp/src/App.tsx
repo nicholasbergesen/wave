@@ -20,13 +20,10 @@ function App() {
         setLoading(true)
 
         try {
-            const response = await fetch('http://localhost:8000/v1/chat/completions', {
+            const response = await fetch('https://localhost:7141/api/chat/ask', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: 'meta-llama/Llama-3.2-3B-Instruct',
-                    messages: newMessages,
-                }),
+                body: JSON.stringify(input),
             })
             const data = await response.json()
             const assistantMessage = data.choices?.[0]?.message?.content || 'No response'

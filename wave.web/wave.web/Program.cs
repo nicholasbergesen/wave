@@ -1,7 +1,8 @@
-
+﻿
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using wave.web.Controllers;
 
 namespace wave.web
 {
@@ -11,11 +12,14 @@ namespace wave.web
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-
+            builder.Services.AddHttpClient();
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
+
+            builder.Services.AddEndpointsApiExplorer();
+
+            builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
 
@@ -27,6 +31,12 @@ namespace wave.web
             {
                 app.MapOpenApi();
             }
+
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            };
 
             app.UseHttpsRedirection();
 
