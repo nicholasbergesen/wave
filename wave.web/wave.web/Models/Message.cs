@@ -1,6 +1,5 @@
-﻿using Microsoft.AspNetCore.OpenApi;
-using Microsoft.AspNetCore.Http.HttpResults;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
+
 namespace wave.web.Models
 {
     public enum MessageRole

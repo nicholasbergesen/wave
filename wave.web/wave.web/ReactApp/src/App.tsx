@@ -25,8 +25,8 @@ function App() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(input),
             })
-            const data = await response.json()
-            const assistantMessage = data.choices?.[0]?.message?.content || 'No response'
+            const responseMessage = await response.json()
+            const assistantMessage = responseMessage.content || 'No response'
             setMessages([...newMessages, { role: 'assistant', content: assistantMessage }])
         } catch (err) {
             setMessages([...newMessages, { role: 'assistant', content: 'Error contacting API.' }])
