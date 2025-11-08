@@ -44,14 +44,14 @@ function App() {
             <div className="chat-box">
                 {messages.map((msg, i) => (
                     <div key={i} className={`msg ${msg.role}`}>
-                        {msg.content}
+                        <div className="chat-display">{msg.content}</div>
                     </div>
                 ))}
                 {loading && <div className="msg assistant">...</div>}
             </div>
             <div className="input-bar">
                 <input
-                    type="text"
+                    type="textarea"
                     value={input}
                     placeholder="Type your message..."
                     onChange={(e) => setInput(e.target.value)}
