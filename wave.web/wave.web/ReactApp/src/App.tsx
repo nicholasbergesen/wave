@@ -1,35 +1,68 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 
-function App() {
-  const [count, setCount] = useState(0)
+type Message = {
+    role: 'user' | 'assistant'
+    content: string
+}
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+function App() {
+    const [messages, setMessages] = useState<Message[]>([])
+    const [input, setInput] = useState('')
+    const [loading, setLoading] = useState(false)
+
+    const sendMessage = async (): Promise<void> => {
+        if (!input.trim()) return
+
+        const newMessages: Message[] = [...messages, { role: 'user', content: input }]
+        setMessages(newMessages)
+        setInput('')
+        setLoading(true)
+
+        try {
+            const response = await fetch('http://localhost:8000/v1/chat/completions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'meta-llama/Llama-3.2-3B-Instruct',
+                    messages: newMessages,
+                }),
+            })
+            const data = await response.json()
+            const assistantMessage = data.choices?.[0]?.message?.content || 'No response'
+            setMessages([...newMessages, { role: 'assistant', content: assistantMessage }])
+        } catch (err) {
+            setMessages([...newMessages, { role: 'assistant', content: 'Error contacting API.' }])
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    return (
+        <div className="app">
+            <header className="header">Wave</header>
+            <div className="chat-box">
+                {messages.map((msg, i) => (
+                    <div key={i} className={`msg ${msg.role}`}>
+                        {msg.content}
+                    </div>
+                ))}
+                {loading && <div className="msg assistant">...</div>}
+            </div>
+            <div className="input-bar">
+                <input
+                    type="text"
+                    value={input}
+                    placeholder="Type your message..."
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                />
+                <button onClick={sendMessage} disabled={loading}>
+                    Send
+                </button>
+            </div>
+        </div>
+    )
 }
 
 export default App

@@ -266,4 +266,5 @@ history/
 # JetBrains Rider
 *.sln.iml
 
-wave.web/wwwroot/*
+wave.web/wave.web/wwwroot/*
+.vs
