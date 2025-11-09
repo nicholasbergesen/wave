@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import './App.css'
+import DocumentPanel from './DocumentPanel'
 
 type Message = {
     role: 'user' | 'assistant'
@@ -10,6 +11,7 @@ function App() {
     const [messages, setMessages] = useState<Message[]>([])
     const [input, setInput] = useState('')
     const [loading, setLoading] = useState(false)
+    const [isPanelOpen, setIsPanelOpen] = useState(false)
 
     const sendMessage = async (): Promise<void> => {
         if (!input.trim()) return
@@ -38,6 +40,7 @@ function App() {
     return (
         <div className="app">
             <header className="header">Wave</header>
+            <DocumentPanel isOpen={isPanelOpen} onToggle={() => setIsPanelOpen(!isPanelOpen)} />
             <div className="chat-box">
                 {messages.map((msg, i) => (
                     <div key={i} className={`msg ${msg.role}`}>

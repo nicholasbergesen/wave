@@ -16,11 +16,13 @@ namespace wave.web.Controllers
     public class ChatController : ControllerBase
     {
         private readonly HttpClient _httpClient;
+        private readonly Services.DocumentService _documentService;
         private static List<Message> _conversationHistory = new List<Message>();
 
-        public ChatController(IHttpClientFactory factory)
+        public ChatController(IHttpClientFactory factory, Services.DocumentService documentService)
         {
             _httpClient = factory.CreateClient();
+            _documentService = documentService;
 
             _conversationHistory.Add(new Message()
             {
@@ -32,10 +34,22 @@ namespace wave.web.Controllers
         [HttpPost("ask")]
         public async Task<IActionResult> Ask([FromBody] string messageContent)
         {
+            // Get relevant document chunks for RAG
+            var relevantChunks = await _documentService.GetRelevantChunks(messageContent);
+            
+            // Build context from relevant chunks
+            var ragContext = "";
+            if (relevantChunks.Any())
+            {
+                ragContext = "Context from documents:\n" + 
+                             string.Join("\n---\n", relevantChunks.Select(c => c.Content)) + 
+                             "\n\nBased on the above context, please answer the following question:\n";
+            }
+
             _conversationHistory.Add(new Message()
             {
                 Role = MessageRole.User.ToString(),
-                Content = messageContent
+                Content = ragContext + messageContent
             });
 
             var vllmPayload = new

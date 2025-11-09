@@ -268,3 +268,6 @@ history/
 
 wave.web/wave.web/wwwroot/*
 .vs
+
+# RAG Documents Data folder
+wave.web/wave.web/Data/
