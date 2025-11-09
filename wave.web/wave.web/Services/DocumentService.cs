@@ -25,10 +25,13 @@ namespace wave.web.Services
 
         public async Task<Document> ProcessAndSaveDocument(string fileName, Stream fileStream)
         {
+            // Sanitize filename to prevent path traversal
+            var sanitizedFileName = Path.GetFileName(fileName);
+            
             var document = new Document
             {
-                FileName = fileName,
-                FilePath = Path.Combine(_dataFolder, $"{Guid.NewGuid()}_{fileName}")
+                FileName = sanitizedFileName,
+                FilePath = Path.Combine(_dataFolder, $"{Guid.NewGuid()}_{sanitizedFileName}")
             };
 
             // Save the file

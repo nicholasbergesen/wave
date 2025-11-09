@@ -26,6 +26,12 @@ namespace wave.web.Controllers
                 return BadRequest("No file uploaded");
             }
 
+            // Limit file size to 10MB
+            if (file.Length > 10 * 1024 * 1024)
+            {
+                return BadRequest("File size exceeds 10MB limit");
+            }
+
             using (var stream = file.OpenReadStream())
             {
                 var document = await _documentService.ProcessAndSaveDocument(file.FileName, stream);
