@@ -271,10 +271,6 @@ history/
 
 wave.web/wave.web/wwwroot/*
 .vs
-<<<<<<< HEAD
-
 # RAG Documents Data folder
 wave.web/wave.web/Data/
-=======
-wave.web/wave.web/ReactApp/node_modules/*
->>>>>>> main
+wave.web/wave.web/ReactApp/node_modules/**
