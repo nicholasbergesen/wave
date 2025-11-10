@@ -19,5 +19,6 @@ namespace wave.web.Models
         public string? DocumentId { get; set; }
         public string? Content { get; set; }
         public int ChunkIndex { get; set; }
+        public List<float>? Embedding { get; set; }
     }
 }

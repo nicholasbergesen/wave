@@ -12,10 +12,12 @@ namespace wave.web.Services
     public class DocumentService
     {
         private readonly string _dataFolder;
+        private readonly EmbeddingService _embeddingService;
         private const int ChunkSize = 500; // Characters per chunk
 
-        public DocumentService()
+        public DocumentService(EmbeddingService embeddingService)
         {
+            _embeddingService = embeddingService;
             _dataFolder = Path.Combine(Directory.GetCurrentDirectory(), "Data");
             if (!Directory.Exists(_dataFolder))
             {
@@ -47,6 +49,9 @@ namespace wave.web.Services
             var text = await ExtractTextFromFile(document.FilePath);
             document.Chunks = ChunkText(text, document.Id);
 
+            // Generate embeddings for all chunks
+            await GenerateEmbeddingsForChunks(document.Chunks);
+
             // Save metadata
             await SaveDocumentMetadata(document);
 
@@ -76,6 +81,17 @@ namespace wave.web.Services
             }
 
             return chunks;
+        }
+
+        private async Task GenerateEmbeddingsForChunks(List<DocumentChunk> chunks)
+        {
+            foreach (var chunk in chunks)
+            {
+                if (!string.IsNullOrEmpty(chunk.Content))
+                {
+                    chunk.Embedding = await _embeddingService.GetEmbedding(chunk.Content);
+                }
+            }
         }
 
         private async Task SaveDocumentMetadata(Document document)
@@ -134,19 +150,33 @@ namespace wave.web.Services
             var documents = await GetAllDocuments();
             var allChunks = documents.SelectMany(d => d.Chunks).ToList();
 
-            // Simple keyword-based relevance (can be improved with embeddings)
-            var queryWords = query.ToLower().Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-            var scoredChunks = allChunks.Select(chunk => new
+            // If no chunks available, return empty list
+            if (allChunks.Count == 0)
             {
-                Chunk = chunk,
-                Score = queryWords.Count(word => chunk.Content?.ToLower().Contains(word) ?? false)
-            })
-            .Where(sc => sc.Score > 0)
-            .OrderByDescending(sc => sc.Score)
-            .Take(topK)
-            .Select(sc => sc.Chunk)
-            .ToList();
+                return new List<DocumentChunk>();
+            }
+
+            // Get embedding for the query
+            var queryEmbedding = await _embeddingService.GetEmbedding(query);
+
+            // If embedding service fails, return empty list
+            if (queryEmbedding == null || queryEmbedding.Count == 0)
+            {
+                return new List<DocumentChunk>();
+            }
+
+            // Calculate cosine similarity for each chunk
+            var scoredChunks = allChunks
+                .Where(chunk => chunk.Embedding != null && chunk.Embedding.Count > 0)
+                .Select(chunk => new
+                {
+                    Chunk = chunk,
+                    Similarity = _embeddingService.CosineSimilarity(queryEmbedding, chunk.Embedding!)
+                })
+                .OrderByDescending(sc => sc.Similarity)
+                .Take(topK)
+                .Select(sc => sc.Chunk)
+                .ToList();
 
             return scoredChunks;
         }
