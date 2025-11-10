@@ -268,3 +268,4 @@ history/
 
 wave.web/wave.web/wwwroot/*
 .vs
+wave.web/wave.web/ReactApp/node_modules/*
