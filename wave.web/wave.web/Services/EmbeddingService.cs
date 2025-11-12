@@ -97,7 +97,8 @@ namespace wave.web.Services
             magnitude1 = Math.Sqrt(magnitude1);
             magnitude2 = Math.Sqrt(magnitude2);
 
-            if (magnitude1 == 0 || magnitude2 == 0)
+            const double epsilon = 1e-8;
+            if (Math.Abs(magnitude1) < epsilon || Math.Abs(magnitude2) < epsilon)
             {
                 return 0;
             }
