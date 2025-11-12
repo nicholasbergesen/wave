@@ -48,7 +48,7 @@ namespace wave.web.Controllers
                     "User question:";
             }
 
-            var combinedInput = $"{ragContext}\n{messageContent}";
+            var combinedInput = string.IsNullOrEmpty(ragContext) ? messageContent : $"{ragContext}\n{messageContent}";
 
             _conversationHistory.Add(new Message()
             {
