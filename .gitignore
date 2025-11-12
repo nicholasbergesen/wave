@@ -191,6 +191,9 @@ FakesAssemblies/
 # Node.js Tools for Visual Studio
 ntvs_analysis.dat
 node_modules/
+
+# React App node_modules
+wave.web/wave.web/ReactApp/node_modules/
 # Visual Studio 6 build log
 *.plg
 # Visual Studio 6 workspace options file
@@ -268,5 +271,7 @@ history/
 
 wave.web/wave.web/wwwroot/*
 .vs
+
+# RAG Documents Data folder
+wave.web/wave.web/Data/
 wave.web/wave.web/ReactApp/node_modules/**
-wave.web/wave.web/Data/**
