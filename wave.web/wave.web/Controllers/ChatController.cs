@@ -39,7 +39,7 @@ namespace wave.web.Controllers
             string ragContext = "";
             if (relevantChunks.Any())
             {
-                var contextText = string.Join("\n\n---\n\n", relevantChunks.Select(c => c.Content.Trim()));
+                var contextText = string.Join("\n\n---\n\n", relevantChunks.Select(c => (c.Content?.Trim()) ?? ""));
 
                 ragContext =
                     "The following background information may help answer the user's question. " +
