@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using wave.web.Models;
 
@@ -67,17 +68,24 @@ namespace wave.web.Services
         private List<DocumentChunk> ChunkText(string text, string documentId)
         {
             var chunks = new List<DocumentChunk>();
+            string normalized = Regex.Replace(text, @"\r\n|\n\r|\n|\r", "\r\n");
             var chunkIndex = 0;
-
-            for (int i = 0; i < text.Length; i += ChunkSize)
+            while(chunkIndex < normalized.Length)
             {
-                var chunkContent = text.Substring(i, Math.Min(ChunkSize, text.Length - i));
+                var chunkContent = normalized.Substring(chunkIndex, Math.Min(ChunkSize, normalized.Length - chunkIndex));
+                chunkContent = chunkContent.ReplaceLineEndings();
+                chunkContent = string.Join(' ', chunkContent.Split(' ')[0..^1]);
+                chunkContent = string.Join("\r\n", chunkContent.Split("\r\n")[0..^1]);
+                chunkContent = string.Join("\r", chunkContent.Split("\r")[0..^1]);
+                var trim = chunkContent.Trim();
                 chunks.Add(new DocumentChunk
                 {
                     DocumentId = documentId,
-                    Content = chunkContent,
+                    Content = trim,
                     ChunkIndex = chunkIndex++
                 });
+
+                chunkIndex += chunkContent.Length;
             }
 
             return chunks;

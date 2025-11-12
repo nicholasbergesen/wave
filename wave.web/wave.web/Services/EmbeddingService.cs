@@ -15,6 +15,7 @@ namespace wave.web.Services
     {
         private readonly HttpClient _httpClient;
         private readonly MLContext _ml;
+        private const int fixedSize = 50;
 
         public EmbeddingService(IHttpClientFactory httpClientFactory)
         {
@@ -36,8 +37,26 @@ namespace wave.web.Services
                 var pipeline = _ml.Transforms.Text.FeaturizeText("Features", "Text");
                 var model = pipeline.Fit(data);
                 var transformed = model.Transform(data);
-                return _ml.Data.CreateEnumerable<TextFeatures>(transformed, reuseRowObject: false).First().Features?.ToList() 
+                //return _ml.Data.CreateEnumerable<TextFeatures>(transformed, reuseRowObject: false).First().Features?.ToList() 
+                //    ?? new List<float>();
+
+                var features = _ml.Data.CreateEnumerable<TextFeatures>(transformed, reuseRowObject: false)
+                    .First()
+                    .Features?
+                    .ToList()
                     ?? new List<float>();
+
+                // Pad with zeros or truncate to fixed size
+                if (features.Count < fixedSize)
+                {
+                    features.AddRange(Enumerable.Repeat(0f, fixedSize - features.Count));
+                }
+                else if (features.Count > fixedSize)
+                {
+                    features = features.Take(fixedSize).ToList();
+                }
+
+                return features;
             }
             catch (Exception ex)
             {
@@ -73,6 +92,30 @@ namespace wave.web.Services
                 Console.WriteLine($"Error getting embedding: {ex.Message}");
                 return new List<float>();
             }
+        }
+
+        public double JaccardSimilarity(List<float> vector1, List<float> vector2)
+        {
+            if (vector1 == null || vector2 == null || vector1.Count == 0 || vector2.Count == 0)
+            {
+                return 0;
+            }
+
+            // Get non-zero indices (which features are present)
+            var set1 = vector1.Select((val, idx) => new { val, idx })
+                              .Where(x => x.val > 0)
+                              .Select(x => x.idx)
+                              .ToHashSet();
+
+            var set2 = vector2.Select((val, idx) => new { val, idx })
+                              .Where(x => x.val > 0)
+                              .Select(x => x.idx)
+                              .ToHashSet();
+
+            var intersection = set1.Intersect(set2).Count();
+            var union = set1.Union(set2).Count();
+
+            return union == 0 ? 0 : (double)intersection / union;
         }
 
         public double CosineSimilarity(List<float> vector1, List<float> vector2)
