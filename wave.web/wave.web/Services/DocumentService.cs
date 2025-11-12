@@ -50,7 +50,7 @@ namespace wave.web.Services
             document.Chunks = ChunkText(text, document.Id);
 
             // Generate embeddings for all chunks
-            await GenerateEmbeddingsForChunks(document.Chunks);
+            GenerateEmbeddingsForChunks(document.Chunks);
 
             // Save metadata
             await SaveDocumentMetadata(document);
@@ -83,13 +83,13 @@ namespace wave.web.Services
             return chunks;
         }
 
-        private async Task GenerateEmbeddingsForChunks(List<DocumentChunk> chunks)
+        private void GenerateEmbeddingsForChunks(List<DocumentChunk> chunks)
         {
             foreach (var chunk in chunks)
             {
                 if (!string.IsNullOrEmpty(chunk.Content))
                 {
-                    chunk.Embedding = await _embeddingService.GetEmbedding(chunk.Content);
+                    chunk.Embedding = _embeddingService.GetEmbedding(chunk.Content);
                 }
             }
         }
@@ -157,7 +157,7 @@ namespace wave.web.Services
             }
 
             // Get embedding for the query
-            var queryEmbedding = await _embeddingService.GetEmbedding(query);
+            var queryEmbedding = _embeddingService.GetEmbedding(query);
 
             // If embedding service fails, return empty list
             if (queryEmbedding == null || queryEmbedding.Count == 0)

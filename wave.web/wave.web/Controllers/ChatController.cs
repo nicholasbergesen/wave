@@ -34,22 +34,26 @@ namespace wave.web.Controllers
         [HttpPost("ask")]
         public async Task<IActionResult> Ask([FromBody] string messageContent)
         {
-            // Get relevant document chunks for RAG
             var relevantChunks = await _documentService.GetRelevantChunks(messageContent);
-            
-            // Build context from relevant chunks
-            var ragContext = "";
+
+            string ragContext = "";
             if (relevantChunks.Any())
             {
-                ragContext = "Context from documents:\n" + 
-                             string.Join("\n---\n", relevantChunks.Select(c => c.Content)) + 
-                             "\n\nBased on the above context, please answer the following question:\n";
+                var contextText = string.Join("\n\n---\n\n", relevantChunks.Select(c => c.Content.Trim()));
+
+                ragContext =
+                    "The following background information may help answer the user's question. " +
+                    "Use it naturally if relevant, but do not repeat it verbatim.\n\n" +
+                    $"Background:\n{contextText}\n\n" +
+                    "User question:";
             }
+
+            var combinedInput = $"{ragContext}\n{messageContent}";
 
             _conversationHistory.Add(new Message()
             {
                 Role = MessageRole.User.ToString(),
-                Content = ragContext + messageContent
+                Content = combinedInput
             });
 
             var vllmPayload = new

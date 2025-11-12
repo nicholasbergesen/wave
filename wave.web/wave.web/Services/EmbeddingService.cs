@@ -1,3 +1,4 @@
+using Microsoft.Build.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,19 +7,47 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Microsoft.ML;
+using Microsoft.ML.Data;
 
 namespace wave.web.Services
 {
     public class EmbeddingService
     {
         private readonly HttpClient _httpClient;
+        private readonly MLContext _ml;
 
         public EmbeddingService(IHttpClientFactory httpClientFactory)
         {
             _httpClient = httpClientFactory.CreateClient();
+            _ml = new MLContext();
         }
 
-        public async Task<List<float>> GetEmbedding(string text)
+        public class TextFeatures
+        {
+            [VectorType]
+            public float[]? Features { get; set; }
+        }
+
+        public List<float> GetEmbedding(string text)
+        {
+            try
+            {
+                var data = _ml.Data.LoadFromEnumerable(new[] { new { Text = text } });
+                var pipeline = _ml.Transforms.Text.FeaturizeText("Features", "Text");
+                var model = pipeline.Fit(data);
+                var transformed = model.Transform(data);
+                return _ml.Data.CreateEnumerable<TextFeatures>(transformed, reuseRowObject: false).First().Features?.ToList() 
+                    ?? new List<float>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting embedding: {ex.Message}");
+                return new List<float>();
+            }
+        }
+
+        public async Task<List<float>> GetEmbeddingApi(string text)
         {
             try
             {
@@ -32,7 +61,7 @@ namespace wave.web.Services
                 response.EnsureSuccessStatusCode();
 
                 var embeddingResponse = await response.Content.ReadFromJsonAsync<EmbeddingResponse>();
-                
+
                 if (embeddingResponse?.Data != null && embeddingResponse.Data.Count > 0)
                 {
                     return embeddingResponse.Data[0].Embedding;
