@@ -106,16 +106,14 @@ namespace wave.web.Services
             var documents = new List<Document>();
             var metadataFiles = Directory.GetFiles(_dataFolder, "*_metadata.json");
 
-            foreach (var file in metadataFiles)
+            var documentTasks = metadataFiles.Select(async file =>
             {
                 var json = await File.ReadAllTextAsync(file);
-                var document = JsonSerializer.Deserialize<Document>(json);
-                if (document != null)
-                {
-                    documents.Add(document);
-                }
-            }
+                return JsonSerializer.Deserialize<Document>(json);
+            });
 
+            var loadedDocuments = await Task.WhenAll(documentTasks);
+            documents.AddRange(loadedDocuments.Where(document => document != null)!);
             return documents;
         }
 
