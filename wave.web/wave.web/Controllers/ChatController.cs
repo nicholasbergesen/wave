@@ -8,6 +8,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
 using wave.web.Models;
+using wave.web.Services;
 
 namespace wave.web.Controllers
 {
@@ -16,13 +17,15 @@ namespace wave.web.Controllers
     public class ChatController : ControllerBase
     {
         private readonly HttpClient _httpClient;
-        private readonly Services.DocumentService _documentService;
+        private readonly DocumentService _documentService;
+        private readonly RagSearchService _ragService;
         private static List<Message> _conversationHistory = new List<Message>();
 
-        public ChatController(IHttpClientFactory factory, Services.DocumentService documentService)
+        public ChatController(IHttpClientFactory factory, DocumentService documentService, RagSearchService ragService)
         {
             _httpClient = factory.CreateClient();
             _documentService = documentService;
+            _ragService = ragService;
 
             _conversationHistory.Add(new Message()
             {
@@ -34,7 +37,7 @@ namespace wave.web.Controllers
         [HttpPost("ask")]
         public async Task<IActionResult> Ask([FromBody] string messageContent)
         {
-            var relevantChunks = await _documentService.GetRelevantChunks(messageContent);
+            var relevantChunks = _ragService.Search(messageContent); //await _documentService.GetRelevantChunks(messageContent);
 
             string ragContext = "";
             if (relevantChunks.Any())
@@ -42,9 +45,9 @@ namespace wave.web.Controllers
                 var contextText = string.Join("\n\n---\n\n", relevantChunks.Select(c => (c.Content?.Trim()) ?? ""));
 
                 ragContext =
-                    "The following background information may help answer the user's question. " +
+                    "The following information may help answer the user's question. " +
                     "Use it naturally if relevant, but do not repeat it verbatim.\n\n" +
-                    $"Background:\n{contextText}\n\n" +
+                    $"Information:\n{contextText}\n\n" +
                     "User question:";
             }
 

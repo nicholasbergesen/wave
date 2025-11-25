@@ -2,18 +2,21 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Threading.Tasks;
+using wave.web.Services;
 
 namespace wave.web
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddHttpClient();
             builder.Services.AddSingleton<Services.EmbeddingService>();
             builder.Services.AddSingleton<Services.DocumentService>();
+            builder.Services.AddSingleton<Services.RagSearchService>();
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
@@ -47,6 +50,12 @@ namespace wave.web
             app.MapControllers();
 
             app.MapFallbackToFile("/index.html");
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var ragService = scope.ServiceProvider.GetRequiredService<RagSearchService>();
+                await ragService.InitializeAsync();
+            }
 
             app.Run();
         }

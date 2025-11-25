@@ -10,6 +10,7 @@ namespace wave.web.Models
         public string? FilePath { get; set; }
         public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
         public long FileSize { get; set; }
+        public string? Content { get; set; }
         public List<DocumentChunk> Chunks { get; set; } = new List<DocumentChunk>();
     }
 
@@ -19,6 +20,5 @@ namespace wave.web.Models
         public string? DocumentId { get; set; }
         public string? Content { get; set; }
         public int ChunkIndex { get; set; }
-        public List<float>? Embedding { get; set; }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace wave.web.Controllers
+namespace wave.web.Models
 {
     public class VllmChatCompletionResponse
     {

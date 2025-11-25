@@ -12,10 +12,12 @@ namespace wave.web.Controllers
     public class DocumentsController : ControllerBase
     {
         private readonly DocumentService _documentService;
+        private readonly RagSearchService _ragService;
 
-        public DocumentsController(DocumentService documentService)
+        public DocumentsController(DocumentService documentService, RagSearchService ragService)
         {
             _documentService = documentService;
+            _ragService = ragService;
         }
 
         [HttpPost("upload")]
@@ -34,7 +36,17 @@ namespace wave.web.Controllers
 
             using (var stream = file.OpenReadStream())
             {
+                // 3. Process the file (Extract text and save metadata)
                 var document = await _documentService.ProcessAndSaveDocument(file.FileName, stream);
+
+                // 4. Generate Vector and Index content
+                // Important: Ensure 'document.Content' holds the actual extracted text string.
+                if (!string.IsNullOrWhiteSpace(document.Content))
+                {
+                    // This creates the vector and saves it to vectors.bin
+                    _ragService.AddDocument(document.Id, document.Content);
+                }
+
                 return Ok(document);
             }
         }
