@@ -14,9 +14,8 @@ namespace wave.web
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddHttpClient();
-            builder.Services.AddSingleton<Services.EmbeddingService>();
-            builder.Services.AddSingleton<Services.DocumentService>();
-            builder.Services.AddSingleton<Services.RagSearchService>();
+            builder.Services.AddSingleton<DocumentService>();
+            builder.Services.AddSingleton<RagSearchService>();
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
