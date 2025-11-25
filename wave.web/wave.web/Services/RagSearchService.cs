@@ -61,7 +61,7 @@ namespace wave.web.Services
             AppendVectorToDisk(docId, vector, text);
         }
 
-        public List<SearchResult> Search(string query, int limit = 5)
+        public List<SearchResult> Search(string query, int limit = 10)
         {
             var queryVector = GenerateVector(query);
 
