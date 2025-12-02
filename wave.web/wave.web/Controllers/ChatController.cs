@@ -32,7 +32,7 @@ namespace wave.web.Controllers
             _conversationHistory.Add(new Message()
             {
                 Role = MessageRole.System.ToString(),
-                Content = "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible. Please ensure that your responses are unbiased. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information. You can ask clarifying questions in the case that you feel you don't hace sufficient information. You assist Nick. When you need current, real-time, or recent information (like news, weather, stock prices, current events, or anything after your training data cutoff), say '[WEB_SEARCH_NEEDED]' at the start of your response followed by the search query you want to perform.",
+                Content = "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible. Please ensure that your responses are unbiased. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information. You can ask clarifying questions in the case that you feel you don't have sufficient information. You assist Nick. When you need current, real-time, or recent information (like news, weather, stock prices, current events, or anything after your training data cutoff), say '[WEB_SEARCH_NEEDED]' at the start of your response followed by the search query you want to perform.",
             });
         }
 
