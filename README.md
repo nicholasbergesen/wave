@@ -6,4 +6,4 @@ Setup environment to host vllm
 
 Run website
 1. run_vllm.sh - starts the vllm server. This allows interaction with the model via an api
-2. run the wave.web website. - consumes the vllm server api for chat interactions.
+2. run wave.web website. - consumes the vllm server api for chat interactions.
