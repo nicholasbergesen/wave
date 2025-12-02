@@ -16,5 +16,11 @@ namespace wave.web.Models
 
         [JsonPropertyName("content")]
         public string? Content { get; set; }
+
+        [JsonPropertyName("usedWebSearch")]
+        public bool UsedWebSearch { get; set; }
+
+        [JsonPropertyName("usedRag")]
+        public bool UsedRag { get; set; }
     }
 }

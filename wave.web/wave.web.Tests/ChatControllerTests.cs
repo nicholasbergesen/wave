@@ -13,6 +13,7 @@ namespace wave.web.Tests
         private Mock<DocumentService> _mockDocumentService;
         private Mock<RagSearchService> _mockRagService;
         private Mock<IGoogleSearchService> _mockGoogleSearchService;
+        private Mock<IWebContentFetcherService> _mockWebContentFetcher;
 
         [TestInitialize]
         public void Setup()
@@ -21,6 +22,7 @@ namespace wave.web.Tests
             _mockDocumentService = new Mock<DocumentService>();
             _mockRagService = new Mock<RagSearchService>();
             _mockGoogleSearchService = new Mock<IGoogleSearchService>();
+            _mockWebContentFetcher = new Mock<IWebContentFetcherService>();
         }
 
         [TestMethod]
@@ -31,7 +33,8 @@ namespace wave.web.Tests
                 _mockHttpClientFactory.Object,
                 _mockDocumentService.Object,
                 _mockRagService.Object,
-                _mockGoogleSearchService.Object
+                _mockGoogleSearchService.Object,
+                _mockWebContentFetcher.Object
             );
 
             // Assert
@@ -48,7 +51,8 @@ namespace wave.web.Tests
                 _mockHttpClientFactory.Object,
                 _mockDocumentService.Object,
                 _mockRagService.Object,
-                _mockGoogleSearchService.Object
+                _mockGoogleSearchService.Object,
+                _mockWebContentFetcher.Object
             );
 
             // Act

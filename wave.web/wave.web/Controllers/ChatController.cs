@@ -20,14 +20,16 @@ namespace wave.web.Controllers
         private readonly DocumentService _documentService;
         private readonly RagSearchService _ragService;
         private readonly IGoogleSearchService _googleSearchService;
+        private readonly IWebContentFetcherService _webContentFetcher;
         private static List<Message> _conversationHistory = new List<Message>();
 
-        public ChatController(IHttpClientFactory factory, DocumentService documentService, RagSearchService ragService, IGoogleSearchService googleSearchService)
+        public ChatController(IHttpClientFactory factory, DocumentService documentService, RagSearchService ragService, IGoogleSearchService googleSearchService, IWebContentFetcherService webContentFetcher)
         {
             _httpClient = factory.CreateClient();
             _documentService = documentService;
             _ragService = ragService;
             _googleSearchService = googleSearchService;
+            _webContentFetcher = webContentFetcher;
 
             _conversationHistory.Add(new Message()
             {
@@ -39,20 +41,46 @@ namespace wave.web.Controllers
         [HttpPost("ask")]
         public async Task<IActionResult> Ask([FromBody] string messageContent)
         {
+            bool usedWebSearch = false;
+            bool usedRag = false;
+
             // Check if the query might benefit from web search
             var webSearchContext = "";
             if (_googleSearchService.IsConfigured() && RequiresWebSearch(messageContent))
             {
-                var searchResults = await _googleSearchService.SearchAsync(messageContent, 5);
+                var searchResults = await _googleSearchService.SearchAsync(messageContent, 3);
                 if (searchResults.Any())
                 {
-                    var searchSummary = string.Join("\n\n", searchResults.Select(r =>
-                        $"Title: {r.Title}\nSource: {r.DisplayLink}\nSummary: {r.Snippet}\nLink: {r.Link}"));
+                    usedWebSearch = true;
 
-                    webSearchContext =
-                        "I found the following recent information from the web that may help answer your question:\n\n" +
-                        $"{searchSummary}\n\n" +
-                        "User question: ";
+                    // Fetch full content from top results and save as RAG documents
+                    var contentParts = new List<string>();
+                    foreach (var result in searchResults.Take(3))
+                    {
+                        var content = await _webContentFetcher.FetchPageContentAsync(result.Link);
+                        if (!string.IsNullOrEmpty(content))
+                        {
+                            // Save to RAG for future use
+                            var docId = $"web_{result.Link.GetHashCode()}_{DateTime.UtcNow.Ticks}";
+                            _ragService.AddDocument(docId, content);
+
+                            // Add to context with metadata
+                            contentParts.Add($"Source: {result.Title} ({result.DisplayLink})\nContent: {content}");
+                        }
+                        else
+                        {
+                            // Fallback to snippet if full content fetch fails
+                            contentParts.Add($"Source: {result.Title} ({result.DisplayLink})\nSummary: {result.Snippet}");
+                        }
+                    }
+
+                    if (contentParts.Any())
+                    {
+                        webSearchContext =
+                            "I found the following recent information from the web that may help answer your question:\n\n" +
+                            $"{string.Join("\n\n---\n\n", contentParts)}\n\n" +
+                            "User question: ";
+                    }
                 }
             }
 
@@ -61,6 +89,7 @@ namespace wave.web.Controllers
             string ragContext = "";
             if (relevantChunks.Any())
             {
+                usedRag = true;
                 var contextText = string.Join("\n\n---\n\n", relevantChunks.Select(c => (c.Content?.Trim()) ?? ""));
 
                 ragContext =
@@ -95,7 +124,9 @@ namespace wave.web.Controllers
             var message = new Message()
             {
                 Role = vllmMessage.Role,
-                Content = vllmMessage.Content
+                Content = vllmMessage.Content,
+                UsedWebSearch = usedWebSearch,
+                UsedRag = usedRag
             };
 
             _conversationHistory.Add(new Message() { Role = message.Role, Content = message.Content });

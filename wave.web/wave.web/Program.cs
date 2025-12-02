@@ -19,6 +19,7 @@ namespace wave.web
             builder.Services.AddSingleton<DocumentService>();
             builder.Services.AddSingleton<RagSearchService>();
             builder.Services.AddSingleton<IGoogleSearchService, GoogleSearchService>();
+            builder.Services.AddSingleton<IWebContentFetcherService, WebContentFetcherService>();
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
