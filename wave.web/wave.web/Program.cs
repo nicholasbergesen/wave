@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Threading.Tasks;
+using wave.web.Models;
 using wave.web.Services;
 
 namespace wave.web
@@ -14,8 +15,10 @@ namespace wave.web
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddHttpClient();
+            builder.Services.Configure<GoogleSearchOptions>(builder.Configuration.GetSection(GoogleSearchOptions.SectionName));
             builder.Services.AddSingleton<DocumentService>();
             builder.Services.AddSingleton<RagSearchService>();
+            builder.Services.AddSingleton<IGoogleSearchService, GoogleSearchService>();
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
