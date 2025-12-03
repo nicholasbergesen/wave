@@ -19,7 +19,7 @@ The initial implementation only used Google search result snippets, which didn't
 ### Solution
 Created `WebContentFetcherService` that:
 - Fetches full HTML content from search result URLs
-- Parses HTML using HtmlAgilityPack to extract meaningful text
+- Parses HTML using Nick.HtmlParser to extract meaningful text
 - Removes non-content elements (scripts, styles, navigation, etc.)
 - Focuses on main content areas (article, main, content divs)
 - Limits content to 8000 characters to avoid overwhelming the LLM
@@ -49,7 +49,7 @@ public class WebContentFetcherService : IWebContentFetcherService
 ```
 
 **Key Features:**
-- **HTML Parsing**: Uses HtmlAgilityPack for robust HTML parsing
+- **HTML Parsing**: Uses Nick.HtmlParser for robust HTML parsing
 - **Content Extraction**: Intelligently finds main content areas
 - **Cleanup**: Removes scripts, styles, navigation elements
 - **Text Normalization**: Handles whitespace and HTML entities
@@ -190,7 +190,7 @@ Updated React components to display icons:
 
 ## Dependencies Added
 
-**HtmlAgilityPack** (v1.12.4)
+**Nick.HtmlParser** (v1.0.8)
 - Industry-standard HTML parsing library
 - Robust handling of malformed HTML
 - Easy DOM traversal and manipulation

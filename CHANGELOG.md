@@ -9,7 +9,7 @@
 
 #### 1. Full Webpage Content Retrieval
 - **WebContentFetcherService**: New service for fetching and parsing complete webpage content
-- **HTML Parsing**: Uses HtmlAgilityPack to extract meaningful text from HTML
+- **HTML Parsing**: Uses Nick.HtmlParser to extract meaningful text from HTML
 - **Smart Extraction**: Removes scripts, styles, navigation, and focuses on main content
 - **Size Limiting**: Content capped at 8000 characters per page for performance
 - **Automatic RAG Storage**: Fetched content saved as RAG documents for future use
@@ -29,7 +29,7 @@
 - **New Service**: `IWebContentFetcherService` / `WebContentFetcherService`
 - **Enhanced Model**: `Message` class with `UsedWebSearch` and `UsedRag` properties
 - **Updated Controller**: `ChatController` tracks and reports source usage
-- **Dependency**: HtmlAgilityPack 1.12.4 added for HTML parsing
+- **Dependency**: Nick.HtmlParser 1.0.8 added for HTML parsing
 - **Service Registration**: `WebContentFetcherService` registered in DI container
 
 #### Frontend (React/TypeScript)
@@ -159,7 +159,7 @@ Triggers web search for queries containing:
 
 ### From v1.0 → v2.0
 - No breaking changes
-- HtmlAgilityPack dependency added automatically via NuGet
+- Nick.HtmlParser dependency added automatically via NuGet
 - Web content automatically fetched and stored
 - UI automatically displays source indicators
 - Existing functionality unchanged

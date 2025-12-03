@@ -5,7 +5,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using HtmlAgilityPack;
+using HtmlParser;
 using Microsoft.Extensions.Logging;
 
 namespace wave.web.Services
@@ -50,32 +50,23 @@ namespace wave.web.Services
 
         private string ExtractTextFromHtml(string html)
         {
-            var doc = new HtmlDocument();
-            doc.LoadHtml(html);
-
-            // Remove script, style, and other non-content elements
-            var nodesToRemove = doc.DocumentNode.SelectNodes("//script|//style|//nav|//header|//footer|//aside|//iframe|//noscript");
-            if (nodesToRemove != null)
+            var nodes = Parser.Parse(html, loadContent: true);
+            
+            // Find main content areas - prefer article or body
+            INode? contentNode = null;
+            foreach (var node in nodes)
             {
-                foreach (var node in nodesToRemove)
-                {
-                    node.Remove();
-                }
+                contentNode = FindNode(node, NodeType.article) 
+                           ?? FindNode(node, NodeType.body);
+                if (contentNode != null) break;
             }
-
-            // Try to find main content area
-            var contentNode = doc.DocumentNode.SelectSingleNode("//main") 
-                           ?? doc.DocumentNode.SelectSingleNode("//article")
-                           ?? doc.DocumentNode.SelectSingleNode("//div[@class='content']")
-                           ?? doc.DocumentNode.SelectSingleNode("//div[@id='content']")
-                           ?? doc.DocumentNode.SelectSingleNode("//body");
 
             if (contentNode == null)
             {
                 return string.Empty;
             }
 
-            var text = contentNode.InnerText;
+            var text = GetTextContent(contentNode);
 
             // Clean up the text
             text = Regex.Replace(text, @"\s+", " ");
@@ -90,6 +81,51 @@ namespace wave.web.Services
             }
 
             return text;
+        }
+
+        private INode? FindNode(INode node, NodeType nodeType)
+        {
+            if (node == null) return null;
+            if (node.Type == nodeType) return node;
+            
+            if (node.Children != null)
+            {
+                foreach (var child in node.Children)
+                {
+                    var found = FindNode(child, nodeType);
+                    if (found != null) return found;
+                }
+            }
+            return null;
+        }
+
+        private string GetTextContent(INode node)
+        {
+            if (node == null || node.Children == null) return string.Empty;
+            
+            // Skip certain tags
+            if (node.Type == NodeType.script || node.Type == NodeType.style || 
+                node.Type == NodeType.nav || node.Type == NodeType.header || 
+                node.Type == NodeType.footer || node.Type == NodeType.aside ||
+                node.Type == NodeType.iframe || node.Type == NodeType.noscript)
+            {
+                return string.Empty;
+            }
+            
+            // Return content for text nodes
+            if (node.Type == NodeType.text)
+            {
+                return node.Content ?? string.Empty;
+            }
+            
+            // Recursively get text from children
+            var sb = new StringBuilder();
+            foreach (var child in node.Children)
+            {
+                sb.Append(GetTextContent(child));
+                sb.Append(" ");
+            }
+            return sb.ToString();
         }
     }
 }
