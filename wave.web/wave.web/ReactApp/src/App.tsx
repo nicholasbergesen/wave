@@ -5,6 +5,8 @@ import DocumentPanel from './DocumentPanel'
 type Message = {
     role: 'user' | 'assistant'
     content: string
+    usedWebSearch?: boolean
+    usedRag?: boolean
 }
 
 function App() {
@@ -44,6 +46,22 @@ function App() {
             <div className="chat-box">
                 {messages.map((msg, i) => (
                     <div key={i} className={`msg ${msg.role}`}>
+                        <div className="msg-header">
+                            {msg.role === 'assistant' && (msg.usedWebSearch || msg.usedRag) && (
+                                <div className="source-indicators">
+                                    {msg.usedWebSearch && (
+                                        <span className="source-icon web-search" title="Used web search">
+                                            🌐
+                                        </span>
+                                    )}
+                                    {msg.usedRag && (
+                                        <span className="source-icon rag-doc" title="Used documents">
+                                            📄
+                                        </span>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                         <div className="chat-display">{msg.content}</div>
                     </div>
                 ))}
