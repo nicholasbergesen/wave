@@ -90,7 +90,7 @@ function DocumentPanel({ isOpen, onToggle }: DocumentPanelProps) {
                             type="file"
                             id="file-upload"
                             onChange={handleFileUpload}
-                            accept=".txt,.md,.css,.cs,.html"
+                            accept=".txt,.md,.css,.cs,.html,.yml,.yaml,.conf"
                             style={{ display: 'none' }}
                         />
                         <label htmlFor="file-upload" className="upload-button">
